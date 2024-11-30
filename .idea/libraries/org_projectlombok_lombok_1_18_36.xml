@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="org.projectlombok:lombok:1.18.36" type="repository">
+    <properties maven-id="org.projectlombok:lombok:1.18.36" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/lombok-1.18.36.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-annotations-2.18.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-2.18.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-databind-2.18.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

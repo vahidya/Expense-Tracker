@@ -1,0 +1,6 @@
+[ {
+  "id" : 1,
+  "description" : "this is my dinnder expense",
+  "category" : "dinner",
+  "amount" : 10.0
+} ]
