@@ -2,6 +2,7 @@ package com.vahidya;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jdk.jfr.Category;
 
 import java.io.File;
@@ -15,8 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -26,12 +29,13 @@ public class Main {
         List<String> readCategoryList;
         System.out.println("Welcome to Expense Tracker Application!");
         System.out.println("Enter a command (type 'help' for available commands, or 'exit' to quit):");
+        File exp_file= new File("expense.json");
+        Path filePath_cat = Paths.get("category.txt");
         while (true){
             System.out.print("Expense-Tracker~");
             //read expense categories from file
-            Path filePath = Paths.get("category.txt");
             try{
-                readCategoryList= Files.readAllLines(filePath);
+                readCategoryList= Files.readAllLines(filePath_cat);
                 for (String category:readCategoryList) Expense_Category.addCategory(category);
             }catch (Exception e){
                 e.printStackTrace();
@@ -56,7 +60,7 @@ public class Main {
                         List<String> temp= new ArrayList<>();
                         temp.add(words.get(1));
                         try {
-                            Files.write(filePath,temp, StandardOpenOption.APPEND);
+                            Files.write(filePath_cat,temp, StandardOpenOption.APPEND);
                         }catch (Exception e){
                             e.printStackTrace();
                         }
@@ -68,7 +72,7 @@ public class Main {
                     if (words.size()==1){
                         System.out.println("list of expense categories:");
                         try {
-                            readCategoryList=Files.readAllLines(filePath);
+                            readCategoryList=Files.readAllLines(filePath_cat);
                             readCategoryList.forEach(
                                     System.out::println
                             );
@@ -76,7 +80,85 @@ public class Main {
                             e.printStackTrace();
                         }
                     }else{
-                        System.out.println("add_cat command has a parameter to set name of your expense category");
+                        System.out.println("cat list has no parameter");
+                    }
+                    break;
+                case "exp_list":
+                    if (words.size()==1){
+                        System.out.println("list of expenses:");
+                        expenseList=readExpensesFromFile();
+                        if (expenseList.isEmpty()){
+                            System.out.println("there is no expense");
+                        }else{
+                            expenseList.forEach(expense -> System.out.println(expense.toString()));
+                        }
+                    }else{
+                        System.out.println("exp_list has no parameter");
+                    }
+                    break;
+                case "exp_filter":
+                    if (words.size()==2){
+                        List<String> finalWords = words;
+                        expenseList=readExpensesFromFile();
+                        if (expenseList.isEmpty()){
+                            System.out.println("there is no expense");
+                        }else{
+                            expenseList.stream().filter(expense -> expense.getCategory().equals(finalWords.get(1)))
+                                    .forEach(expense -> System.out.println(expense.toString()));
+                        }
+                    }else{
+                        System.out.println("exp_filter has a parameter to determine category");
+                    }
+                    break;
+                case "del_expense":
+                    if (words.size()==2){
+                        int id= Integer.parseInt(words.get(1));
+                        expenseList=readExpensesFromFile();
+                        if (expenseList.isEmpty()){
+                            System.out.println("This ID does not exist!!!");
+                        }else{
+                            if(expenseList.removeIf(expense -> expense.getId()==id)){
+                                ObjectMapper objectMapper = new ObjectMapper();
+                                objectMapper.registerModule(new JavaTimeModule());
+                                try {
+                                    objectMapper.writerWithDefaultPrettyPrinter().writeValue(exp_file, expenseList);
+                                    System.out.println("new expense with ID="+id+" was deleted.");
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                }
+                            }else{
+                                System.out.println("This ID does not exist!!!");
+                            }
+                        }
+                    }else{
+                        System.out.println("del_expense has a parameter to determine id of expense");
+                    }
+                    break;
+                case "summary":
+                    if (words.size()==1){
+                        expenseList=readExpensesFromFile();
+                        if (expenseList.isEmpty()){
+                            System.out.println("There is no expense!!!");
+                        }else{
+                            int sumOfAmount= expenseList.stream().mapToInt(expense -> (int) expense.getAmount()).sum();
+                            System.out.println("total expense : $"+sumOfAmount);
+                        }
+                    }else{
+                        if (words.size()==2){
+                            String cat_filter=words.get(1);
+                            expenseList=readExpensesFromFile();
+                            if (expenseList.isEmpty()){
+                                System.out.println("There is no expense!!!");
+                            }else{
+                                int sumOfAmount= expenseList.stream()
+                                        .filter(expense -> expense.getCategory().equals(cat_filter))
+                                        .mapToInt(expense -> (int) expense.getAmount()).sum();
+                                System.out.println("total expense for cat" +cat_filter+" is : $"+sumOfAmount);
+                            }
+                        }else {
+                            System.out.println("del_expense has a parameter to determine id of expense");
+                        }
+
                     }
                     break;
                 case "add_expense":
@@ -100,9 +182,10 @@ public class Main {
                                                 Expense newExpense=new Expense(desc, cat, amount);
                                                 expenseList.add(newExpense);
                                                 ObjectMapper objectMapper = new ObjectMapper();
+                                                objectMapper.registerModule(new JavaTimeModule());
                                                 try {
-                                                    File file= new File("expense.json");
-                                                    objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, expenseList);
+                                                    objectMapper.writerWithDefaultPrettyPrinter().writeValue(exp_file, expenseList);
+                                                    System.out.println("new expense with ID="+newExpense.getId()+" was added.");
                                                 }catch (Exception e){
                                                     e.printStackTrace();
                                                 }
@@ -138,11 +221,12 @@ public class Main {
 
     private static void helpAboutAdd_expens() {
         System.out.println("add_exp command has a structure like this :");
-        System.out.println("     add_expense --description \" going to restaurant\" --amount 100 --category \"dinner\"   ");
+        System.out.println(" add_expense --description \"restaurant payment\" --amount 100 --category \"dinner\"  ");
     }
 
     private static List<Expense> readExpensesFromFile() {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         try {
             File file= new File("expense.json");
             List<Expense> eList=objectMapper.readValue(file, new TypeReference<List<Expense>>() {});

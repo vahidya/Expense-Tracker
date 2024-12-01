@@ -1,6 +1,13 @@
 [ {
   "id" : 1,
-  "description" : "this is my dinnder expense",
+  "description" : "restaurant payment",
   "category" : "dinner",
-  "amount" : 10.0
+  "amount" : 100.0,
+  "dateTime" : "2024-12-01 17:23:25"
+}, {
+  "id" : 3,
+  "description" : "at home",
+  "category" : "dinner",
+  "amount" : 100.0,
+  "dateTime" : "2024-12-01 17:28:02"
 } ]

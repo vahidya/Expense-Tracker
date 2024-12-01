@@ -1,15 +1,16 @@
 package com.vahidya;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class Expense {
     public static int LAST_ID;
     private int id;
@@ -17,10 +18,14 @@ public class Expense {
     private String category;
     private float amount;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dateTime;
+
     public Expense(String description, String category, float amount) {
         this.id=++LAST_ID;
         this.description = description;
         this.category = category;
         this.amount = amount;
+        this.dateTime=LocalDateTime.now();
     }
 }
