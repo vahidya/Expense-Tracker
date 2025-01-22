@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jdk.jfr.Category;
 
+import javax.swing.plaf.synth.SynthEditorPaneUI;
 import java.io.File;
 import java.lang.ref.SoftReference;
 import java.nio.file.Files;
@@ -52,6 +53,16 @@ public class Main {
             switch (words.get(0).toLowerCase()){
                 case "help" :
                     System.out.println("Available commands:");
+                    System.out.println("add_cat : add a new expense category");
+                    System.out.println("cat_lis : show list of categories ");
+                    System.out.println("add_expense: add a new expense");
+                    System.out.println("    add_expense example :");
+                    System.out.println("add_expense --description \"last night dinner\" --amount 50 --category \"dinner\" ");
+                    System.out.println("exp_list: show list of expenses ");
+                    System.out.println("exp_filter: filter the list of expenses by category ");
+                    System.out.println("del_expense : delete a expense by its ID");
+                    System.out.println("summary [category name ] : sum of total expenses or sum of expenses for a special category");
+
                     break;
                 case "add_cat":
                     if (words.size()==2){
@@ -153,7 +164,7 @@ public class Main {
                                 int sumOfAmount= expenseList.stream()
                                         .filter(expense -> expense.getCategory().equals(cat_filter))
                                         .mapToInt(expense -> (int) expense.getAmount()).sum();
-                                System.out.println("total expense for cat" +cat_filter+" is : $"+sumOfAmount);
+                                System.out.println("total expense for " +cat_filter+ " category  is : $"+sumOfAmount);
                             }
                         }else {
                             System.out.println("del_expense has a parameter to determine id of expense");

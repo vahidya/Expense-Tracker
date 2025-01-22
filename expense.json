@@ -10,4 +10,10 @@
   "category" : "dinner",
   "amount" : 100.0,
   "dateTime" : "2024-12-01 17:28:02"
+}, {
+  "id" : 4,
+  "description" : "last night dinner",
+  "category" : "dinner",
+  "amount" : 50.0,
+  "dateTime" : "2025-01-22 12:26:29"
 } ]
